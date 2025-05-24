@@ -1,0 +1,249 @@
+/* src/styles/SynguardStyles.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --sg-blue: #002C5F;
+  --sg-gold: #B19E5F;
+  --sg-salmon: #F3966C;
+  --sg-white: #FFFFFF;
+  --sg-light-grey: #F5F5F5;
+  --sg-grey: #E1E5EA;
+  --sg-dark-grey: #6C757D;
+}
+
+/* Apply Poppins font to the entire app */
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--sg-light-grey);
+  margin: 0;
+  padding: 0;
+}
+
+/* Header styling */
+.sg-header {
+  background-color: var(--sg-blue);
+  color: var(--sg-white);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sg-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sg-logo-text {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  margin: 0;
+}
+
+.sg-logo-tagline {
+  display: block;
+  font-size: 12px;
+  font-weight: normal;
+  letter-spacing: 1px;
+}
+
+/* Container styling */
+.sg-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px 30px;
+}
+
+/* Panel styling */
+.sg-panel {
+  background-color: var(--sg-white);
+  border-radius: 8px;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+/* Section heading styling */
+.sg-section-heading {
+  color: var(--sg-blue);
+  font-weight: 500;
+  position: relative;
+  margin-bottom: 15px;
+  padding-left: 15px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+}
+
+.sg-section-heading::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  background-color: var(--sg-salmon);
+  border-radius: 2px;
+}
+
+/* Button styling */
+.sg-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.sg-button-primary {
+  background-color: var(--sg-salmon);
+  color: var(--sg-white);
+}
+
+.sg-button-primary:hover {
+  background-color: #E88A60;
+}
+
+.sg-button-secondary {
+  background-color: var(--sg-white);
+  color: var(--sg-blue);
+  border: 1px solid var(--sg-grey);
+}
+
+.sg-button-secondary:hover {
+  background-color: var(--sg-light-grey);
+}
+
+/* Table styling */
+.sg-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.sg-table th {
+  background-color: var(--sg-light-grey);
+  color: var(--sg-blue);
+  padding: 12px 15px;
+  text-align: left;
+  font-weight: 600;
+  border-bottom: 1px solid var(--sg-grey);
+}
+
+.sg-table th:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+
+.sg-table th:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.sg-table td {
+  padding: 14px 15px;
+  border-bottom: 1px solid var(--sg-grey);
+}
+
+.sg-table tr:nth-child(even) {
+  background-color: var(--sg-light-grey);
+}
+
+.sg-table tr:last-child td {
+  border-bottom: none;
+}
+
+/* Badge styling */
+.sg-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.sg-badge-blue {
+  background-color: rgba(0, 44, 95, 0.15);
+  color: var(--sg-blue);
+}
+
+.sg-badge-gold {
+  background-color: rgba(177, 158, 95, 0.15);
+  color: #9A8A51;
+}
+
+.sg-badge-salmon {
+  background-color: rgba(243, 150, 108, 0.15);
+  color: #E07E56;
+}
+
+/* Search styling */
+.sg-search-container {
+  position: relative;
+  max-width: 400px;
+  margin-bottom: 20px;
+}
+
+.sg-search-input {
+  width: 100%;
+  padding: 12px 12px 12px 40px;
+  border-radius: 4px;
+  border: 1px solid var(--sg-grey);
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.sg-search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--sg-dark-grey);
+}
+
+/* Action buttons styling */
+.sg-action-buttons {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+/* Icon button styling */
+.sg-icon-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+}
+
+.sg-icon-button:hover {
+  background-color: var(--sg-light-grey);
+}
+
+.sg-icon-button-edit {
+  color: var(--sg-blue);
+}
+
+.sg-icon-button-delete {
+  color: #d9534f;
+}

@@ -1,0 +1,156 @@
+/* ModalStyles.css - Apply these styles to all your modal components */
+
+.sg-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+}
+
+.sg-modal {
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+}
+
+.sg-modal-header {
+  padding: 15px 20px;
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #dee2e6;
+  border-radius: 10px 10px 0 0;
+}
+
+.sg-modal-header h2, .sg-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a3c61;
+}
+
+.sg-modal-content {
+  padding: 20px;
+  overflow-y: auto;
+  background-color: #ffffff;
+  flex-grow: 1;
+}
+
+.sg-modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #dee2e6;
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  background-color: #f8f9fa;
+  border-radius: 0 0 10px 10px;
+}
+
+.sg-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.sg-btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.sg-btn-primary:hover {
+  background-color: #0069d9;
+  transform: translateY(-1px);
+}
+
+.sg-btn-success {
+  background-color: #28a745;
+  color: white;
+}
+
+.sg-btn-success:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
+}
+
+.sg-btn-secondary {
+  background-color: #6c757d;
+  color: white;
+}
+
+.sg-btn-secondary:hover {
+  background-color: #5a6268;
+  transform: translateY(-1px);
+}
+
+.sg-close-button {
+  position: absolute;
+  top: 15px;
+  right: 20px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #6c757d;
+}
+
+.sg-form-group {
+  margin-bottom: 15px;
+}
+
+.sg-form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #495057;
+}
+
+.sg-form-control {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.sg-form-control:focus {
+  color: #495057;
+  background-color: #fff;
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* For modal with horizontal actions */
+.sg-modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 768px) {
+  .sg-modal {
+    width: 95%;
+    max-height: 95vh;
+  }
+}

@@ -1,0 +1,175 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;700&display=swap');
+
+.quick-config-page {
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+  background: #f0f2f5;
+  min-height: 100vh;
+}
+
+.header-bar {
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+.inputs-panel.panel,
+.overview-panel.panel,
+.quote-preview-section.panel {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.inputs-panel h3,
+.overview-panel h3,
+.quote-preview-section h3 {
+  font-size: 1.6em;
+  color: #1a3c61;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+.config-box {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.config-box label {
+  display: flex;
+  flex-direction: column;
+  font-size: 1em;
+  color: #343a40;
+  font-weight: 400;
+}
+
+.config-box input,
+.config-box textarea {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1em;
+  color: #343a40;
+  margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+.config-box input:focus,
+.config-box textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.3);
+}
+
+.config-box textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.readonly-input {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.quote-preview-table,
+.overview-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+}
+
+.quote-preview-table th,
+.quote-preview-table td,
+.overview-table th,
+.overview-table td {
+  border: 1px solid #e9ecef;
+  padding: 12px;
+  text-align: left;
+  font-size: 0.95em;
+}
+
+.quote-preview-table th,
+.overview-table th {
+  background-color: #f8f9fa;
+  color: #1a3c61;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.quote-preview-table td,
+.overview-table td {
+  color: #343a40;
+  font-weight: 400;
+}
+
+.config-summary {
+  font-size: 0.95em;
+  color: #343a40;
+  margin-bottom: 15px;
+  font-weight: 400;
+}
+
+.controller-summary-list {
+  list-style: none;
+  padding: 0;
+  font-size: 1em;
+  color: #343a40;
+  font-weight: 400;
+}
+
+.floating-save {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.action-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  transition: filter 0.2s ease;
+}
+
+.action-btn:hover {
+  filter: brightness(90%);
+}
+
+@media (max-width: 768px) {
+  .quick-config-page {
+    padding: 10px;
+  }
+
+  .inputs-panel.panel,
+  .overview-panel.panel,
+  .quote-preview-section.panel {
+    min-width: 100%;
+  }
+
+  .quote-preview-table th,
+  .quote-preview-table td,
+  .overview-table th,
+  .overview-table td {
+    padding: 8px;
+    font-size: 0.85em;
+  }
+
+  .action-btn {
+    padding: 8px 16px;
+    font-size: 0.9em;
+  }
+}
