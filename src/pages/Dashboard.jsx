@@ -5,6 +5,7 @@ import { useQuickConfig } from "../context/QuickConfigContext";
 import NewQuoteModal from "./NewQuoteModal";
 import ConfigModal from "./ConfigModal";
 import SettingsModal from "./SettingsModal";
+import jsPDF from 'jspdf';
 
 // Synguard brand colors
 const colors = {
@@ -49,6 +50,12 @@ const PlusIcon = () => (
   </svg>
 );
 
+const DownloadIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+  </svg>
+);
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { quotes, deleteQuote } = useQuotes();
@@ -76,6 +83,44 @@ export default function Dashboard() {
       // ignore
     }
     return { symbol: '£', code: 'GBP' };
+  };
+
+  // Get current country setting from localStorage
+  const getCurrentCountrySetting = () => {
+    try {
+      const settings = localStorage.getItem('systemSettings');
+      if (settings) {
+        const parsed = JSON.parse(settings);
+        return parsed.country || 'UK';
+      }
+    } catch (e) {
+      // ignore
+    }
+    return 'UK';
+  };
+
+  // Get system settings for email
+  const getSystemSettings = () => {
+    try {
+      const settings = localStorage.getItem('systemSettings');
+      if (settings) {
+        return JSON.parse(settings);
+      }
+    } catch (e) {
+      // ignore
+    }
+    return { companyName: 'Synguard', country: 'UK', currency: '£' };
+  };
+
+  // Map country to region codes
+  const mapCountryToRegion = (country) => {
+    const mapping = {
+      'UK': 'UK',
+      'Ireland': 'UK',
+      'Belgium': 'BE', 
+      'Netherlands': 'NL'
+    };
+    return mapping[country] || 'UK';
   };
 
   // Helper function to get price based on currency
@@ -141,14 +186,167 @@ export default function Dashboard() {
       }, 0);
   };
 
-  // Sample sales contacts data
-  const salesContacts = [
-    { id: 1, name: "Wesley Heiden", email: "wesley.heiden@synguard.nl", phone: "+31 653 44 33 72", region: "BE" },
-    { id: 2, name: "Jan-Peter Hulsker", email: "janpeter.hulsker@synguard.nl", phone: "+31 850 60 24 92", region: "BE" },
-    { id: 3, name: "Vincent Hamerlinck", email: "Vincent.Hamerlinck@synguard.be", phone: "+32 498 67 21 98", region: "RoW" },
-    { id: 4, name: "Billy Hopkins", email: "billy.hopkins@synguard.co.uk", phone: "+44 792 716 7976", region: "UK" },
-    { id: 5, name: "Paul Taylor", email: "paul.taylor@synguard.co.uk", phone: "+44 79 33 09 64 77", region: "UK" },
+  // Generate Excel for quote
+  const generateQuoteExcel = (quote) => {
+    const settings = getSystemSettings();
+    const currentCurrency = getCurrentSystemCurrency();
+    
+    // Sheet 1: Quote Details
+    const quoteDetails = [
+      ['Quote Name', quote.name],
+      ['Quote ID', quote.id],
+      ['Date', new Date(quote.date).toLocaleDateString()],
+      ['System Type', quote.systemType],
+      ['Company', settings.companyName],
+      ['Currency', currentCurrency.code],
+      ['Status', quote.status],
+      ['Total Value', calculateTotalValue(quote)]
+    ];
+
+    // Sheet 2: Line Items
+    const lineItems = [
+      ['Product Name', 'Quantity', 'Unit Price', 'Discount %', 'Total Price', 'Cost Type']
+    ];
+    
+    if (quote.items && Array.isArray(quote.items)) {
+      quote.items.forEach(item => {
+        const price = getPriceFromProduct(item, currentCurrency.code);
+        const qty = item.qty || 1;
+        const discount = item.discountStandard || item.discountPercent || 0;
+        const itemTotal = price * qty * (1 - discount / 100);
+        
+        lineItems.push([
+          item.name || 'Product',
+          qty,
+          price,
+          discount,
+          itemTotal,
+          item.costType || 'One-time'
+        ]);
+      });
+    }
+
+    // Sheet 3: System Configuration
+    const systemConfig = [
+      ['Protocol', quote.protocol || 'N/A'],
+      ['Door Communications', quote.doorComms || 'N/A'],
+      ['Deployment', quote.deployment || 'N/A'],
+      ['Target Doors Per Controller', quote.targetDoorsPerController || 'N/A']
+    ];
+
+    return {
+      quoteDetails,
+      lineItems,
+      systemConfig,
+      fileName: `Quote_${quote.name.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.xlsx`
+    };
+  };
+
+  // Export quote (simplified version without Google Drive)
+  const exportQuote = async (quote) => {
+    try {
+      // Show loading state
+      const originalButton = document.querySelector(`[data-quote-id="${quote.id}"] .export-button`);
+      if (originalButton) {
+        originalButton.innerHTML = 'Exporting...';
+        originalButton.disabled = true;
+      }
+      
+      // Generate Excel data structure
+      const excelData = generateQuoteExcel(quote);
+      
+      // Create CSV content as Excel placeholder
+      let csvContent = "data:text/csv;charset=utf-8,";
+      
+      // Quote Details section
+      csvContent += "QUOTE DETAILS\n";
+      excelData.quoteDetails.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+      
+      csvContent += "\nLINE ITEMS\n";
+      excelData.lineItems.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+      
+      csvContent += "\nSYSTEM CONFIGURATION\n";
+      excelData.systemConfig.forEach(row => {
+        csvContent += row.join(",") + "\n";
+      });
+      
+      // Download CSV file
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", excelData.fileName.replace('.xlsx', '.csv'));
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      alert(`✅ Quote exported successfully!\n\nFile: ${excelData.fileName.replace('.xlsx', '.csv')}\n\nThe file has been downloaded to your computer.`);
+      
+    } catch (error) {
+      console.error('Error generating quote:', error);
+      alert('❌ Failed to generate quote file.');
+      
+    } finally {
+      // Reset button state
+      const button = document.querySelector(`[data-quote-id="${quote.id}"] .export-button`);
+      if (button) {
+        button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" /></svg>';
+        button.disabled = false;
+      }
+    }
+  };
+
+  // Sales contacts data with job titles
+  const allSalesContacts = [
+    { 
+      id: 1, 
+      name: "Wesley Heiden", 
+      jobTitle: "Sales Manager",
+      email: "wesley.heiden@synguard.nl", 
+      phone: "+31 653 44 33 72", 
+      region: "NL" 
+    },
+    { 
+      id: 2, 
+      name: "Jan-Peter Hulsker", 
+      jobTitle: "Senior Sales Executive",
+      email: "janpeter.hulsker@synguard.nl", 
+      phone: "+31 850 60 24 92", 
+      region: "NL" 
+    },
+    { 
+      id: 3, 
+      name: "Vincent Hamerlinck", 
+      jobTitle: "Regional Sales Director",
+      email: "Vincent.Hamerlinck@synguard.be", 
+      phone: "+32 498 67 21 98", 
+      region: "BE" 
+    },
+    { 
+      id: 4, 
+      name: "Billy Hopkins", 
+      jobTitle: "Sales Representative",
+      email: "billy.hopkins@synguard.co.uk", 
+      phone: "+44 792 716 7976", 
+      region: "UK" 
+    },
+    { 
+      id: 5, 
+      name: "Paul Taylor", 
+      jobTitle: "Account Manager",
+      email: "paul.taylor@synguard.co.uk", 
+      phone: "+44 79 33 09 64 77", 
+      region: "BE" 
+    },
   ];
+
+  // Filter contacts based on current country setting
+  const currentCountry = getCurrentCountrySetting();
+  const targetRegion = mapCountryToRegion(currentCountry);
+  const salesContacts = allSalesContacts.filter(contact => contact.region === targetRegion);
 
   return (
     <div style={{ 
@@ -160,41 +358,32 @@ export default function Dashboard() {
       <header style={{
         backgroundColor: colors.blue,
         color: colors.white,
-        padding: "15px 30px",
+        padding: "25px 30px",
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
         boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{
-            backgroundColor: colors.white,
-            borderRadius: "8px",
-            padding: "8px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center"
-          }}>
-            <svg width="32" height="32" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="100" height="100" rx="20" fill="#002C5F"/>
-              <path d="M25 35C25 29.5 29.5 25 35 25H65C70.5 25 75 29.5 75 35V65C75 70.5 70.5 75 65 75H35C29.5 75 25 70.5 25 65V35Z" stroke="#FFFFFF" strokeWidth="8"/>
-              <path d="M35 65L65 35M35 35L65 65" stroke="#FFFFFF" strokeWidth="8" strokeLinecap="round"/>
-            </svg>
-          </div>
+          <img 
+            src="/synguard-logo.png" 
+            alt="Synguard Logo" 
+            style={{ width: '500px', height: 'auto' }}
+          />
           <h1 style={{
             fontSize: "18px",
             fontWeight: 500,
             letterSpacing: "0.5px",
             margin: 0
           }}>
-            SYNGUARD
+            
             <span style={{
               display: "block",
               fontSize: "12px",
               fontWeight: "normal",
               letterSpacing: "1px"
             }}>
-              ALWAYS WITH YOU
+              
             </span>
           </h1>
         </div>
@@ -536,7 +725,7 @@ export default function Dashboard() {
                           textAlign: "center",
                           borderBottom: isLastRow ? "none" : `1px solid ${colors.grey}`
                         }}>
-                          <div style={{ display: "flex", gap: "15px", justifyContent: "center" }}>
+                          <div style={{ display: "flex", gap: "8px", justifyContent: "center" }} data-quote-id={quote.id}>
                             <button
                               style={{
                                 background: "none",
@@ -565,6 +754,29 @@ export default function Dashboard() {
                               onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
                             >
                               <EditIcon />
+                            </button>
+                            <button
+                              className="export-button"
+                              style={{
+                                background: "none",
+                                border: "none",
+                                cursor: "pointer",
+                                color: colors.gold,
+                                padding: "5px",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: "30px",
+                                height: "30px",
+                                transition: "background-color 0.2s"
+                              }}
+                              title={`Export ${quote.name}`}
+                              onClick={() => exportQuote(quote)}
+                              onMouseOver={(e) => e.currentTarget.style.backgroundColor = colors.lightGrey}
+                              onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                            >
+                              <DownloadIcon />
                             </button>
                             <button
                               style={{
@@ -629,6 +841,14 @@ export default function Dashboard() {
               borderRadius: "2px"
             }}></span>
             Sales Contacts
+            <span style={{
+              marginLeft: "10px",
+              fontSize: "14px",
+              fontWeight: "normal",
+              color: colors.darkGrey
+            }}>
+              (Filtered by {currentCountry} - {targetRegion} region)
+            </span>
           </h3>
           
           {salesContacts.length === 0 ? (
@@ -640,7 +860,10 @@ export default function Dashboard() {
               borderRadius: "6px",
               fontStyle: "italic"
             }}>
-              No sales contacts available.
+              No sales contacts available for {currentCountry} ({targetRegion} region).
+              <div style={{ fontSize: "12px", marginTop: "8px" }}>
+                Change your country setting to see contacts from other regions.
+              </div>
             </div>
           ) : (
             <div style={{ overflowX: "auto" }}>
@@ -660,6 +883,12 @@ export default function Dashboard() {
                       borderTopLeftRadius: "6px",
                       borderBottomLeftRadius: "6px"
                     }}>Name</th>
+                    <th style={{ 
+                      padding: "12px 15px", 
+                      textAlign: "left", 
+                      color: colors.blue,
+                      fontWeight: 600 
+                    }}>Job Title</th>
                     <th style={{ 
                       padding: "12px 15px", 
                       textAlign: "left", 
@@ -700,6 +929,14 @@ export default function Dashboard() {
                         </td>
                         <td style={{ 
                           padding: "14px 15px", 
+                          borderBottom: isLastRow ? "none" : `1px solid ${colors.grey}`,
+                          color: colors.darkGrey,
+                          fontStyle: "italic"
+                        }}>
+                          {contact.jobTitle}
+                        </td>
+                        <td style={{ 
+                          padding: "14px 15px", 
                           borderBottom: isLastRow ? "none" : `1px solid ${colors.grey}`
                         }}>
                           <a 
@@ -731,14 +968,18 @@ export default function Dashboard() {
                             fontWeight: 500,
                             backgroundColor: contact.region === "UK" 
                               ? "rgba(0, 44, 95, 0.15)" 
-                              : (contact.region === "US" 
+                              : (contact.region === "BE" 
                                 ? "rgba(243, 150, 108, 0.15)" 
-                                : "rgba(177, 158, 95, 0.15)"),
+                                : (contact.region === "NL"
+                                  ? "rgba(177, 158, 95, 0.15)"
+                                  : "rgba(108, 117, 125, 0.15)")),
                             color: contact.region === "UK" 
                               ? colors.blue 
-                              : (contact.region === "US" 
+                              : (contact.region === "BE" 
                                 ? "#E07E56" 
-                                : "#9A8A51")
+                                : (contact.region === "NL"
+                                  ? "#9A8A51"
+                                  : colors.darkGrey))
                           }}>
                             {contact.region}
                           </span>
@@ -752,6 +993,7 @@ export default function Dashboard() {
           )}
         </div>
       </div>
+      
       {/* New Quote Modal */}
       {showNewQuoteModal && (
         <NewQuoteModal 
