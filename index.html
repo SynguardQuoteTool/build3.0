@@ -1,14 +1,139 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="/synguard-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/synguard-icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Synguard Quote Tool</title>
+    
+    <!-- Google Fonts - Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    
+    <!-- Synguard Brand Colors CSS Variables -->
+    <style>
+      :root {
+        --synguard-blue: #002C5F;
+        --synguard-gold: #B19E5F;
+        --synguard-salmon: #F3966C;
+        --synguard-white: #FFFFFF;
+        --synguard-light-grey: #F5F5F5;
+        --synguard-grey: #E1E5EA;
+        --synguard-dark-grey: #6C757D;
+      }
+      
+      body {
+        font-family: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: var(--synguard-light-grey);
+      }
+      
+      /* Loading screen styles */
+      #loading-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--synguard-blue);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loading-logo {
+        color: var(--synguard-white);
+        font-size: 24px;
+        font-weight: 500;
+        letter-spacing: 2px;
+        margin-bottom: 20px;
+      }
+      
+      .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-top: 3px solid var(--synguard-white);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .loading-text {
+        color: var(--synguard-white);
+        font-size: 14px;
+        margin-top: 20px;
+        opacity: 0.8;
+      }
+      
+      /* Hide loading screen when app loads */
+      .loaded #loading-screen {
+        opacity: 0;
+        pointer-events: none;
+      }
+    </style>
   </head>
+  
   <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="loading-logo">SYNGUARD</div>
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Loading Quote Tool...</div>
+    </div>
+    
+    <!-- Main App Container -->
     <div id="root"></div>
+    
+    <!-- App Loading Script -->
+    <script>
+      // Hide loading screen when React app loads
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          document.body.classList.add('loaded');
+        }, 1500); // Give React time to load
+      });
+      
+      // Also hide loading screen when React renders
+      document.addEventListener('DOMContentLoaded', function() {
+        // Check if React app has rendered
+        const checkAppLoaded = setInterval(function() {
+          const appElement = document.querySelector('#root > *');
+          if (appElement) {
+            clearInterval(checkAppLoaded);
+            setTimeout(function() {
+              document.body.classList.add('loaded');
+            }, 500);
+          }
+        }, 100);
+      });
+    </script>
+    
+    <!-- Vite React App -->
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- Service Worker for Offline Support (Optional) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful');
+            })
+            .catch(function(err) {
+              console.log('ServiceWorker registration failed');
+            });
+        });
+      }
+    </script>
   </body>
 </html>
